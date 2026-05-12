@@ -9,7 +9,7 @@ A aplicação permite pesquisar filmes e visualizar informações relevantes, co
 - Ano de lançamento;
 - Sinopse;
 - Detalhes da obra;
-- Principais notícias relacionadas ao filme pesquisado;
+
 
 O sistema foi desenvolvido com foco em experiência do usuário, consumo de APIs e atualização dinâmica de conteúdo.
 
