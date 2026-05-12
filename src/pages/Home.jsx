@@ -9,6 +9,9 @@ const Home = () => {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // NOVO ESTADO PARA ORDENAÇÃO
+  const [sortOrder, setSortOrder] = useState('');
+
   // 2. Busca os filmes ao carregar a página
   useEffect(() => {
     const fetchMovies = async () => {
@@ -23,21 +26,48 @@ const Home = () => {
     };
 
     fetchMovies();
-  }, []); // Array vazio significa que executa apenas uma vez no "mount"
+  }, []);
 
-  // 3. O Retorno do JSX (Onde estava o erro de sintaxe)
+  // NOVA LÓGICA DE ORDENAÇÃO
+  const sortedMovies = [...movies].sort((a, b) => {
+    if (sortOrder === 'highest') {
+      return b.vote_average - a.vote_average;
+    }
+
+    if (sortOrder === 'lowest') {
+      return a.vote_average - b.vote_average;
+    }
+
+    return 0;
+  });
+
+  // 3. JSX
   return (
     <div className="container">
       <h1>Filmes em Tendência</h1>
+
+      {/* NOVO FILTRO DE ORDENAÇÃO */}
+      <div style={{ marginBottom: '20px' }}>
+        <label>Ordenar por nota: </label>
+
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+        >
+          <option value="">Padrão</option>
+          <option value="highest">Maior nota</option>
+          <option value="lowest">Menor nota</option>
+        </select>
+      </div>
 
       {loading ? (
         <div className="loading">Carregando catálogo...</div>
       ) : (
         <div className="movie-grid">
-          {movies.map((movie) => (
-            <div 
-              key={movie.id} 
-              onClick={() => setSelectedMovie(movie)} 
+          {sortedMovies.map((movie) => (
+            <div
+              key={movie.id}
+              onClick={() => setSelectedMovie(movie)}
               style={{ cursor: 'pointer' }}
             >
               <MovieCard movie={movie} />
@@ -46,11 +76,11 @@ const Home = () => {
         </div>
       )}
 
-      {/* Só renderiza o Modal se houver um filme selecionado */}
+      {/* Modal */}
       {selectedMovie && (
-        <MovieModal 
-          movie={selectedMovie} 
-          onClose={() => setSelectedMovie(null)} 
+        <MovieModal
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
         />
       )}
     </div>
