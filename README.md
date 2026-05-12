@@ -19,7 +19,6 @@ O sistema foi desenvolvido com foco em experiência do usuário, consumo de APIs
 
 - 🔍 Pesquisa de filmes em tempo real;
 - 🎬 Exibição de filmes populares;
-- 📰 Integração com notícias relacionadas ao filme pesquisado;
 - 📝 Gerenciamento de críticas e avaliações;
 - 💾 Persistência de dados das críticas;
 - 📄 Visualização de detalhes dos filmes;
