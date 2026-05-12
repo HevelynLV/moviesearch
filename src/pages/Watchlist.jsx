@@ -1,147 +1,62 @@
 import { useState, useEffect } from 'react';
 
-// Página da watchlist onde os filmes salvos e reviews gerais são exibidos.
 const Watchlist = () => {
+  const [reviewsEncontradas, setReviewsEncontradas] = useState([]);
 
-  // Estado que guarda os filmes da lista.
-  const [watchlist, setWatchlist] = useState([]);
-
-  // Estados do formulário de review.
-  const [userName, setUserName] = useState('');
-  const [rating, setRating] = useState('10');
-  const [review, setReview] = useState('');
-  
-  // Estado que armazena as reviews salvas.
-  const [reviews, setReviews] = useState([]);
-
-  // Carrega dados salvos no localStorage ao abrir a página.
   useEffect(() => {
+    // Pegamos as reviews (que estão organizadas por ID do filme no seu MovieModal)
+    const savedMovieReviews = JSON.parse(localStorage.getItem('movieReviews')) || {};
+    
+    // Pegamos a lista de filmes (para pegar poster e título)
     const savedList = JSON.parse(localStorage.getItem('watchlist')) || [];
-    const savedReviews = JSON.parse(localStorage.getItem('reviews')) || [];
 
-    setWatchlist(savedList);
-    setReviews(savedReviews);
+    // Criamos uma lista baseada APENAS nas reviews existentes
+    const listaComReviews = Object.keys(savedMovieReviews).map(movieId => {
+      // Tentamos achar os dados do filme (título/poster) na nossa watchlist
+      const dadosDoFilme = savedList.find(m => m.id.toString() === movieId.toString());
+      
+      return {
+        id: movieId,
+        title: dadosDoFilme?.title || "Filme desconhecido",
+        poster_path: dadosDoFilme?.poster_path || null,
+        reviews: savedMovieReviews[movieId]
+      };
+    });
+
+    setReviewsEncontradas(listaComReviews);
   }, []);
-
-  // Função para adicionar uma nova review.
-  const handleReview = (e) => {
-    e.preventDefault();
-
-    const newReview = {
-      userName,
-      rating,
-      review,
-      id: Date.now()
-    };
-
-    const updatedReviews = [...reviews, newReview];
-
-    // Atualiza estado e salva no localStorage.
-    setReviews(updatedReviews);
-    localStorage.setItem('reviews', JSON.stringify(updatedReviews));
-
-    // Limpa os campos do formulário.
-    setUserName('');
-    setReview('');
-  };
-
-  // Remove uma review pelo id.
-  const handleDelete = (id) => {
-    const updatedReviews = reviews.filter(r => r.id !== id);
-
-    setReviews(updatedReviews);
-    localStorage.setItem('reviews', JSON.stringify(updatedReviews));
-  };
 
   return (
     <div className="container">
+      {/* Trocado o título conforme pedido */}
+      <h1>Minhas Reviews</h1>
 
-      {/* Título da página */}
-      <h1>Minha Lista de Filmes</h1>
-
-      {/* Lista de filmes salvos */}
-      <div className="movie-grid">
-        {watchlist.map(movie => (
-          <div key={movie.id} className="movie-item-list">
-            <p><strong>{movie.title}</strong></p>
-          </div>
-        ))}
-      </div>
-
-      <hr />
-
-      {/* Formulário para enviar review */}
-      <h2>Deixe uma Review Geral</h2>
-
-      <form onSubmit={handleReview} className="review-form">
-
-        {/* Campo do nome */}
-        <input
-          type="text"
-          placeholder="Teu Nome"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-          required
-        />
-
-        {/* Nota da review */}
-        <select
-          value={rating}
-          onChange={(e) => setRating(e.target.value)}
-        >
-          {[...Array(11).keys()].map(n => (
-            <option key={n} value={n}>{n}</option>
-          ))}
-        </select>
-
-        {/* Texto da review */}
-        <textarea
-          placeholder="O que achaste dos filmes?"
-          value={review}
-          onChange={(e) => setReview(e.target.value)}
-          required
-        />
-
-        <button type="submit">Guardar Review</button>
-      </form>
-
-      {/* Lista de reviews salvas */}
-      <h3>Reviews Guardadas</h3>
-
-      <div className="reviews-list">
-        {reviews.length === 0 ? (
-
-          // Mensagem caso não existam reviews.
-          <p className="no-reviews">Nenhuma review ainda.</p>
-
+      <div className="watchlist-feed">
+        {reviewsEncontradas.length === 0 ? (
+          <p className="no-reviews">Você ainda não escreveu nenhuma review.</p>
         ) : (
-
-          // Exibe todas as reviews.
-          reviews.map(r => (
-            <div key={r.id} className="review-item">
-
-              <div className="review-header">
-
-                <span className="review-author">
-                  {r.userName}
-                </span>
-
-                <span className="review-badge">
-                  ⭐ {r.rating}
-                </span>
-
-                {/* Botão para remover review */}
-                <button
-                  className="delete-btn"
-                  onClick={() => handleDelete(r.id)}
-                >
-                  X
-                </button>
+          reviewsEncontradas.map(item => (
+            <div key={item.id} className="review-card-container" style={{display: 'flex', gap: '20px', marginBottom: '20px', background: '#1a1a1a', padding: '15px', borderRadius: '8px'}}>
+              
+              <div className="movie-info-side">
+                {item.poster_path ? (
+                  <img src={`https://image.tmdb.org/t/p/w500${item.poster_path}`} alt={item.title} style={{width: '120px', borderRadius: '5px'}} />
+                ) : (
+                  <div style={{width: '120px', height: '180px', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>Sem Foto</div>
+                )}
+                <h3 style={{fontSize: '1.1rem', marginTop: '10px'}}>{item.title}</h3>
               </div>
 
-              <p className="review-text">
-                {r.review}
-              </p>
+              <div className="reviews-content-side" style={{flex: 1}}>
+                <h4 style={{color: '#9466ff'}}>Meus Comentários:</h4>
+                {item.reviews.map((r, index) => (
+                  <div key={index} style={{background: '#252525', padding: '10px', borderRadius: '5px', marginTop: '10px', borderLeft: '4px solid #9466ff'}}>
+                    <p style={{fontStyle: 'italic'}}>"{r.text}"</p>
+                    <small style={{color: '#888'}}>{r.date}</small>
+                  </div>
+                ))}
+              </div>
+
             </div>
           ))
         )}
