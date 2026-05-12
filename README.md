@@ -57,12 +57,6 @@ Responsável por fornecer:
 
 [TMDB API](https://developer.themoviedb.org/)
 
-### 📰 News API
-
-Responsável por buscar notícias relacionadas aos filmes pesquisados.
-
-[News API](https://newsapi.org/)
-
 ---
 
 ## 📂 Estrutura do Projeto
